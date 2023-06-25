@@ -97,7 +97,7 @@ static void compile_shaders() {
     U_TRANSFORM = glGetUniformLocation(shader_program, "transform");
 
     if(U_TRANSFORM == -1) {
-        printf("Error getting uniform 'transform' in Vertex Shader.\n");
+        printf("Error getting uniform 'scale' in Vertex Shader.\n");
         exit(1);
     }
 
@@ -115,12 +115,26 @@ static void compile_shaders() {
     glUseProgram(shader_program);
 }
 
+void transform_test() {
+    static float scale = 1.0f;
+    static float delta = 0.00025f;
+    scale += delta;
+
+    if(scale >= 1.5f || scale <= 0.5f)
+        delta *= -1.0f;
+
+    Matrix4f scale_transform = new_matrix4f(scale, 0.0f, 0.0f, 0.0f,    // X
+                                        0.0f, scale, 0.0f, 0.0f,        // Y
+                                        0.0f, 0.0f, scale, 0.0f,        // Z
+                                        0.0f, 0.0f, 0.0f, 1.0f);        // W
+    glUniformMatrix4fv(U_TRANSFORM, 1, GL_TRUE, &scale_transform.mat[0][0]);
+}
+
 void draw() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     // -----------------------------------
     // Uniform Tests
-    // TODO: Add Matrix Multiplication Operator Overload
 
 
     // -----------------------------------
@@ -128,15 +142,15 @@ void draw() {
 
 //    static float scale = 1.0f;
 //    static float delta = 0.0005f;
-//
 //    scale += delta;
+//
 //    if(scale >= 1.5f || scale <= 0.5f)
 //        delta *= -1.0f;
 //
 //    Matrix4f scale_transform = new_matrix4f(scale, 0.0f, 0.0f, 0.0f,    // X
-//                                        0.0f, scale, 0.0f, 0.0f,        // Y
-//                                        0.0f, 0.0f, scale, 0.0f,        // Z
-//                                        0.0f, 0.0f, 0.0f, 1.0f);        // W
+//                                            0.0f, scale, 0.0f, 0.0f,    // Y
+//                                            0.0f, 0.0f, scale, 0.0f,    // Z
+//                                            0.0f, 0.0f, 0.0f, 1.0f);    // W
 //    glUniformMatrix4fv(U_TRANSFORM, 1, GL_TRUE, &scale_transform.mat[0][0]);
 
     // -----------------------------------
@@ -156,7 +170,7 @@ void draw() {
 //                                        0.0f, 1.0f, 0.0f, scale,        // Y
 //                                        0.0f, 0.0f, 1.0f, 0.0f,         // Z
 //                                        0.0f, 0.0f, 0.0f, 1.0f);        // W
-//    glUniformMatrix4fv(U_TRANSFORM, 1, GL_TRUE, &translation.mat[0][0]); // GL_TRUE = Row-Major Order | GL_FALSE = Column-Major Order
+//    glUniformMatrix4fv(U_TRANSFORM, 1, GL_TRUE, &translation.mat[0][0]);
 
     // -----------------------------------
 
@@ -178,6 +192,12 @@ void draw() {
 //    glUniformMatrix4fv(U_TRANSFORM, 1, GL_TRUE, &rotation.mat[0][0]);
 
     // -----------------------------------
+
+
+    // -----------------------------------
+    // Combination Test
+
+    transform_test();
 
     // END Uniform Tests
     // -----------------------------------
