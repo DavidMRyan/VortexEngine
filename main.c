@@ -10,11 +10,15 @@
 
 GLuint VBO;
 
+// Global Uniforms
+GLint U_SCALE;
+GLint U_TRANSLATION;
+
 static void create_vertex_buffer() {
     Vector3f Vertices[3];
-    Vertices[0] = new_vec3f(-1.0f, -1.0f, 0.0f);   // Bottom left
-    Vertices[1] = new_vec3f(1.0f, -1.0f, 0.0f);    // Bottom right
-    Vertices[2] = new_vec3f(0.0f, 1.0f, 0.0f);     // Top
+    Vertices[0] = new_vec3f(-1.0f, -1.0f, 0.0f);    // Bottom left
+    Vertices[1] = new_vec3f(1.0f, -1.0f, 0.0f);     // Bottom right
+    Vertices[2] = new_vec3f(0.0f, 1.0f, 0.0f);      // Top
 
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -88,6 +92,18 @@ static void compile_shaders() {
         exit(1);
     }
 
+    // -----------------------------------
+    // Uniform Testing
+
+    // U_SCALE = glGetUniformLocation(shader_program, "scale"); // OLD -> Scale Uniform Temporarily Removed from Shader!
+    U_TRANSLATION= glGetUniformLocation(shader_program, "translation");
+    if(U_SCALE == -1) {
+        printf("Error getting uniform 'scale' in Vertex Shader.\n");
+        exit(1);
+    }
+
+    // -----------------------------------
+
     // Validate shader information
     glValidateProgram(shader_program);
     glGetProgramiv(shader_program, GL_VALIDATE_STATUS, &success);
@@ -102,11 +118,32 @@ static void compile_shaders() {
 
 void draw() {
     glClear(GL_COLOR_BUFFER_BIT);
+
+    // -----------------------------------
+    // Uniform Testing
+
+    static float scale = 0.0f;
+    static float delta = 0.0005f;
+    scale += delta;
+
+    if(scale >= 1.0f || scale <= -1.0f)
+        delta *= -1.0f;
+
+    // glUniform1f(U_SCALE, scale); // OLD -> increase/decrease triangle scale every second
+    Matrix4f translation = new_matrix4f(1.0f, 0.0f, 0.0f, scale * 2,    // X
+                                        0.0f, 1.0f, 0.0f, scale,        // Y
+                                        0.0f, 0.0f, 1.0f, 0.0f,         // Z
+                                        0.0f, 0.0f, 0.0f, 1.0f);        // W
+    glUniformMatrix4fv(U_TRANSLATION, 1, GL_TRUE, &translation.mat[0][0]); // GL_TRUE = Row-Major Order | GL_FALSE = Column-Major Order
+
+    // -----------------------------------
+
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glDisableVertexAttribArray(0);
+    glutPostRedisplay();
 
     glutSwapBuffers();
 }
@@ -115,7 +152,7 @@ int main(int argc, char** argv) {
     // Create GLUT Handle & Initialize Properties
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
-    glutInitWindowSize(512,512);
+    glutInitWindowSize(1024,1024);
     glutInitWindowPosition(100,100);
     glutCreateWindow("Vortex Engine v0.0.1");
 
