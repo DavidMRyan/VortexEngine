@@ -4,15 +4,13 @@
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+#include <math.h>
 
 #include "src/include/util.h"
 #include "src/include/math_3d.h"
 
 GLuint VBO;
-
-// Global Uniforms
-GLint U_SCALE;
-GLint U_TRANSLATION;
+GLint U_TRANSFORM;
 
 static void create_vertex_buffer() {
     Vector3f Vertices[3];
@@ -95,10 +93,11 @@ static void compile_shaders() {
     // -----------------------------------
     // Uniform Testing
 
-    // U_SCALE = glGetUniformLocation(shader_program, "scale"); // OLD -> Scale Uniform Temporarily Removed from Shader!
-    U_TRANSLATION= glGetUniformLocation(shader_program, "translation");
-    if(U_SCALE == -1) {
-        printf("Error getting uniform 'scale' in Vertex Shader.\n");
+    // Universal Transform Modifier
+    U_TRANSFORM = glGetUniformLocation(shader_program, "transform");
+
+    if(U_TRANSFORM == -1) {
+        printf("Error getting uniform 'transform' in Vertex Shader.\n");
         exit(1);
     }
 
@@ -120,22 +119,67 @@ void draw() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     // -----------------------------------
-    // Uniform Testing
+    // Uniform Tests
+    // TODO: Add Matrix Multiplication Operator Overload
 
-    static float scale = 0.0f;
-    static float delta = 0.0005f;
-    scale += delta;
 
-    if(scale >= 1.0f || scale <= -1.0f)
-        delta *= -1.0f;
+    // -----------------------------------
+    // Scale
 
-    // glUniform1f(U_SCALE, scale); // OLD -> increase/decrease triangle scale every second
-    Matrix4f translation = new_matrix4f(1.0f, 0.0f, 0.0f, scale * 2,    // X
-                                        0.0f, 1.0f, 0.0f, scale,        // Y
-                                        0.0f, 0.0f, 1.0f, 0.0f,         // Z
-                                        0.0f, 0.0f, 0.0f, 1.0f);        // W
-    glUniformMatrix4fv(U_TRANSLATION, 1, GL_TRUE, &translation.mat[0][0]); // GL_TRUE = Row-Major Order | GL_FALSE = Column-Major Order
+//    static float scale = 1.0f;
+//    static float delta = 0.0005f;
+//
+//    scale += delta;
+//    if(scale >= 1.5f || scale <= 0.5f)
+//        delta *= -1.0f;
+//
+//    Matrix4f scale_transform = new_matrix4f(scale, 0.0f, 0.0f, 0.0f,    // X
+//                                        0.0f, scale, 0.0f, 0.0f,        // Y
+//                                        0.0f, 0.0f, scale, 0.0f,        // Z
+//                                        0.0f, 0.0f, 0.0f, 1.0f);        // W
+//    glUniformMatrix4fv(U_TRANSFORM, 1, GL_TRUE, &scale_transform.mat[0][0]);
 
+    // -----------------------------------
+
+
+    // -----------------------------------
+    // Translation
+
+//    static float scale = 0.0f;
+//    static float delta = 0.0005f;
+//    scale += delta;
+//
+//    if(scale >= 1.0f || scale <= -1.0f)
+//        delta *= -1.0f;
+//
+//    Matrix4f translation = new_matrix4f(1.0f, 0.0f, 0.0f, scale * 2,    // X
+//                                        0.0f, 1.0f, 0.0f, scale,        // Y
+//                                        0.0f, 0.0f, 1.0f, 0.0f,         // Z
+//                                        0.0f, 0.0f, 0.0f, 1.0f);        // W
+//    glUniformMatrix4fv(U_TRANSFORM, 1, GL_TRUE, &translation.mat[0][0]); // GL_TRUE = Row-Major Order | GL_FALSE = Column-Major Order
+
+    // -----------------------------------
+
+
+    // -----------------------------------
+    // Rotation
+
+//    static float theta_radians = 0.0f;
+//    static float delta = 0.01f;
+//
+//    theta_radians += delta;
+//    if(theta_radians >= 1.5708f || theta_radians <= -1.5708f)
+//        delta *= -1.0f;
+//
+//    Matrix4f rotation = new_matrix4f(cosf(theta_radians), -sinf(theta_radians), 0.0f, 0.0f,    // X
+//                                        sinf(theta_radians), cosf(theta_radians), 0.0f, 0.0f,  // Y
+//                                        0.0f, 0.0f, 1.0f, 0.0f,     // Z
+//                                        0.0f, 0.0f, 0.0f, 1.0f);    // W
+//    glUniformMatrix4fv(U_TRANSFORM, 1, GL_TRUE, &rotation.mat[0][0]);
+
+    // -----------------------------------
+
+    // END Uniform Tests
     // -----------------------------------
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
