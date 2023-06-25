@@ -34,4 +34,19 @@ Matrix4f new_matrix4f(float a00, float a01, float a02, float a03,
     return *_mat;
 }
 
+Matrix4f mul(const Matrix4f* left, const Matrix4f* right) {
+    Matrix4f* _mat = malloc(sizeof(Matrix4f));
+
+    for (unsigned int i = 0; i < 4; i++) {
+        for (unsigned int j = 0; j < 4; j++) {
+            _mat->mat[i][j] = left->mat[i][0] * right->mat[0][j] +
+                              left->mat[i][1] * right->mat[1][j] +
+                              left->mat[i][2] * right->mat[2][j] +
+                              left->mat[i][3] * right->mat[3][j];
+        }
+    }
+
+    return *_mat;
+}
+
 #endif //VORTEXENGINE_MATH_3D_H
