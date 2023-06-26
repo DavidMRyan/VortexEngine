@@ -49,4 +49,21 @@ Matrix4f mul(const Matrix4f* left, const Matrix4f* right) {
     return *_mat;
 }
 
+typedef struct Vertex {
+    Vector3f pos;
+    Vector3f color;
+} Vertex;
+
+Vertex new_vertex(float x, float y) {
+    Vertex* vert = malloc(sizeof(Vertex));
+    vert->pos = new_vec3f(x, y, 0.0f);
+
+    float r = (float)rand() / (float)RAND_MAX;
+    float g = (float)rand() / (float)RAND_MAX;
+    float b = (float)rand() / (float)RAND_MAX;
+    vert->color = new_vec3f(r, g, b);
+
+    return *vert;
+}
+
 #endif //VORTEXENGINE_MATH_3D_H
