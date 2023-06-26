@@ -1,13 +1,13 @@
 #define GLEW_STATIC
-#define WINDOW_WIDTH 1024
-#define WINDOW_HEIGHT 1024
+#define WINDOW_WIDTH 1920
+#define WINDOW_HEIGHT 1080
 
 #include <stdio.h>
+#include <math.h>
+#include <process.h>
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-#include <math.h>
-#include <process.h>
 
 #include "src/include/util.h"
 #include "src/include/math_3d.h"
@@ -149,69 +149,8 @@ static void compile_shaders() {
     glUseProgram(shader_program);
 }
 
-void transform_test() {
-    // -----------------------------------
-    // Scale
-
-//    static float scale = 1.0f;
-//    static float delta = 0.0005f;
-//    scale += delta;
-//
-//    if(scale >= 1.5f || scale <= 0.5f)
-//        delta *= -1.0f;
-//
-//    Matrix4f scale_transform = new_matrix4f(scale, 0.0f, 0.0f, 0.0f,    // X
-//                                            0.0f, scale, 0.0f, 0.0f,    // Y
-//                                            0.0f, 0.0f, scale, 0.0f,    // Z
-//                                            0.0f, 0.0f, 0.0f, 1.0f);    // W
-//    glUniformMatrix4fv(U_TRANSFORM, 1, GL_TRUE, &scale_transform.mat[0][0]);
-
-    // -----------------------------------
-
-
-    // -----------------------------------
-    // Translation
-
-//    static float scale = 0.0f;
-//    static float delta = 0.0005f;
-//    scale += delta;
-//
-//    if(scale >= 1.0f || scale <= -1.0f)
-//        delta *= -1.0f;
-//
-//    Matrix4f translation = new_matrix4f(1.0f, 0.0f, 0.0f, scale * 2,    // X
-//                                        0.0f, 1.0f, 0.0f, scale,        // Y
-//                                        0.0f, 0.0f, 1.0f, 0.0f,         // Z
-//                                        0.0f, 0.0f, 0.0f, 1.0f);        // W
-//    glUniformMatrix4fv(U_TRANSFORM, 1, GL_TRUE, &translation.mat[0][0]);
-
-    // -----------------------------------
-
-
-    // -----------------------------------
-    // Rotation
-
-//    static float theta_radians = 0.0f;
-//    static float delta = 0.01f;
-//
-//    theta_radians += delta;
-//    if(theta_radians >= 1.5708f || theta_radians <= -1.5708f)
-//        delta *= -1.0f;
-//
-//    Matrix4f rotation = new_matrix4f(cosf(theta_radians), -sinf(theta_radians), 0.0f, 0.0f,    // X
-//                                        sinf(theta_radians), cosf(theta_radians), 0.0f, 0.0f,  // Y
-//                                        0.0f, 0.0f, 1.0f, 0.0f,     // Z
-//                                        0.0f, 0.0f, 0.0f, 1.0f);    // W
-//    glUniformMatrix4fv(U_TRANSFORM, 1, GL_TRUE, &rotation.mat[0][0]);
-
-    // -----------------------------------
-}
-
 void draw() {
     glClear(GL_COLOR_BUFFER_BIT);
-
-    // Transformation Testing
-    // transform_test();
 
     // -----------------------------------------
     // Perspective Projection Testing
@@ -231,11 +170,20 @@ void draw() {
 
     float FOV = 90.0f;
     float tanHalfFOV = tanf(radians(FOV / 2.0f));
-    float f = 1/tanHalfFOV;
+    float d = 1/tanHalfFOV;
+    float aspect_ratio = (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT;
 
-    Matrix4f projection = new_matrix4f(f, 0.0f, 0.0f, 0.0f,
-                                        0.0f, f, 0.0f, 0.0f,
-                                        0.0f, 0.0f, 1.0f, 0.0f,
+    // View Frustum Calculations
+    float near_plane = 1.0f;
+    float far_plane = 10.0f;
+    float dist = near_plane - far_plane;
+
+    float A = (-far_plane - near_plane) / dist;
+    float B = 2.0f * far_plane * near_plane / dist;
+
+    Matrix4f projection = new_matrix4f(d / aspect_ratio, 0.0f, 0.0f, 0.0f,
+                                        0.0f, d, 0.0f, 0.0f,
+                                        0.0f, 0.0f, A, B,
                                         0.0f, 0.0f, 1.0f, 0.0f);
 
     Matrix4f temp = mul(&projection, &translation);
