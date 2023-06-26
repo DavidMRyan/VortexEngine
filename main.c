@@ -1,8 +1,9 @@
 #define GLEW_STATIC
+#define VERSION "Version 0.1.3"
 #define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1080
 
-// Temp
+// Temp -> Mesh Rotation Delta
 #define ROTATION_DELTA 0.005f
 
 #include <stdio.h>
@@ -19,7 +20,6 @@
 // Global Uniforms
 GLuint VBO;
 GLuint IBO;
-GLint U_TRANSFORM;
 GLint U_LOCALPOS;
 
 // Transforms
@@ -133,19 +133,6 @@ static void compile_shaders() {
         exit(1);
     }
 
-    // -----------------------------------
-    // Uniform Testing
-
-    // Universal Transform Modifier
-//    U_TRANSFORM = glGetUniformLocation(shader_program, "transform");
-//
-//    if(U_TRANSFORM == -1) {
-//        printf("Error getting uniform 'scale' in Vertex Shader.\n");
-//        exit(1);
-//    }
-
-    // -----------------------------------
-
     // Validate shader information
     glValidateProgram(shader_program);
     glGetProgramiv(shader_program, GL_VALIDATE_STATUS, &success);
@@ -226,11 +213,14 @@ int main(int argc, char** argv) {
     srand(getpid());
 
     // Create GLUT Handle & Initialize Properties
+    char* title = get_dynamic_title(VERSION);
+
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowSize(WINDOW_WIDTH,WINDOW_HEIGHT);
     glutInitWindowPosition(100,100);
-    glutCreateWindow("Vortex Engine v0.0.1");
+    glutCreateWindow(title);
+    free(title);
 
     // Initialize GL Extension Wrangler (GLEW)
     GLenum res = glewInit();
@@ -243,7 +233,7 @@ int main(int argc, char** argv) {
     GLclampf r = 0.0f, g = 0.0f, b = 0.0f, a = 0.0f;
     glClearColor(r, g, b, a);
 
-    // Enable Culling
+    // Enable & Configure Culling
     glEnable(GL_CULL_FACE);
     glFrontFace(GL_CW);
     glCullFace(GL_BACK);

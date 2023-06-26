@@ -1,6 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <malloc.h>
 
 #include "../include/util.h"
 
@@ -35,4 +35,16 @@ char* read_shader(const char* filename) {
 
     fclose(file);
     return buffer;
+}
+
+char* get_dynamic_title(char* additional) {
+    char* base = "Vortex Engine (OpenGL 4.6 Renderer) | ";
+
+    unsigned int base_len = strlen(base);
+    unsigned int additional_len = strlen(additional);
+    char* result = (char*)malloc((base_len + additional_len + 1) * sizeof(char));
+
+    strcpy(result, base);
+    strcat(result, additional);
+    return result;
 }
