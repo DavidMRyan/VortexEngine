@@ -3,6 +3,10 @@
 
 #define radians(degrees) (float)(degrees * M_PI / 180.0f)
 #define degrees(radians) (float)(radians * 180.0f / M_PI)
+#define length(v)        (float)(sqrtf(v->x * v->x + v->y * v->y + v->z * v->z))
+
+// ------------------------------------------------
+// Vectors & Related
 
 typedef struct Vector3f {
     float x;
@@ -10,15 +14,16 @@ typedef struct Vector3f {
     float z;
 } Vector3f;
 
-Vector3f new_vec3f(float _x, float _y, float _z) {
-    Vector3f* _vec = malloc(sizeof(Vector3f));
-    if(!_vec) fprintf(stderr, "Couldn't allocate size of Vector3f!\n");
-    _vec->x = _x;
-    _vec->y = _y;
-    _vec->z = _z;
+Vector3f new_vec3f(float _x, float _y, float _z);
+Vector3f vec3f_normalize(Vector3f* vec);
+Vector3f vec3f_cross(Vector3f* vec, const Vector3f* v);
 
-    return *_vec;
-}
+// ------------------------------------------------
+
+
+
+// ------------------------------------------------
+// Matrices & Related
 
 typedef struct Matrix4f {
     float mat[4][4];
@@ -27,46 +32,34 @@ typedef struct Matrix4f {
 Matrix4f new_matrix4f(float a00, float a01, float a02, float a03,
                       float a10, float a11, float a12, float a13,
                       float a20, float a21, float a22, float a23,
-                      float a30, float a31, float a32, float a33) {
-    Matrix4f* _mat = malloc(sizeof(Matrix4f));
-    _mat->mat[0][0] = a00; _mat->mat[0][1] = a01; _mat->mat[0][2] = a02; _mat->mat[0][3] = a03;
-    _mat->mat[1][0] = a10; _mat->mat[1][1] = a11; _mat->mat[1][2] = a12; _mat->mat[1][3] = a13;
-    _mat->mat[2][0] = a20; _mat->mat[2][1] = a21; _mat->mat[2][2] = a22; _mat->mat[2][3] = a23;
-    _mat->mat[3][0] = a30; _mat->mat[3][1] = a31; _mat->mat[3][2] = a32; _mat->mat[3][3] = a33;
+                      float a30, float a31, float a32, float a33);
+Matrix4f mul(const Matrix4f* left, const Matrix4f* right);
+void init_scale_transform(Matrix4f* _mat, float x, float y, float z);
+Matrix4f init_rotation_transform(float x, float y, float z);
+//void init_rotation_qtransform(const Quaternion* quaternion); // TODO: Add Later
+void init_translation_transform(Matrix4f* _mat, float x, float y, float z);
+void init_camera_transform(Matrix4f* _mat, const Vector3f* target, const Vector3f* up);
+void init_camera_transform_pos(Matrix4f* _mat, const Vector3f* pos, const Vector3f* target, const Vector3f* up);
+//void init_perspective_transform(Matrix4f* _mat, const PersProjection* p); // TODO: Add Later
+//void init_ortho_transform(Matrix4f* _mat, const OrthoProjection* p); // TODO: Add Later
+void init_rotation_x(Matrix4f* _mat, float x);
+void init_rotation_y(Matrix4f* _mat, float y);
+void init_rotation_z(Matrix4f* _mat, float z);
 
-    return *_mat;
-}
+// ------------------------------------------------
 
-Matrix4f mul(const Matrix4f* left, const Matrix4f* right) {
-    Matrix4f* _mat = malloc(sizeof(Matrix4f));
 
-    for (unsigned int i = 0; i < 4; i++) {
-        for (unsigned int j = 0; j < 4; j++) {
-            _mat->mat[i][j] = left->mat[i][0] * right->mat[0][j] +
-                              left->mat[i][1] * right->mat[1][j] +
-                              left->mat[i][2] * right->mat[2][j] +
-                              left->mat[i][3] * right->mat[3][j];
-        }
-    }
 
-    return *_mat;
-}
+// ------------------------------------------------
+// Vertices & Related
 
 typedef struct Vertex {
     Vector3f pos;
     Vector3f color;
 } Vertex;
 
-Vertex new_vertex(float x, float y, float z) {
-    Vertex* vert = malloc(sizeof(Vertex));
-    vert->pos = new_vec3f(x, y, z);
+Vertex new_vertex(float x, float y, float z);
 
-    float r = (float)rand() / (float)RAND_MAX;
-    float g = (float)rand() / (float)RAND_MAX;
-    float b = (float)rand() / (float)RAND_MAX;
-    vert->color = new_vec3f(r, g, b);
-
-    return *vert;
-}
+// ------------------------------------------------
 
 #endif //VORTEXENGINE_MATH_3D_H

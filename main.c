@@ -2,6 +2,9 @@
 #define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1080
 
+// Temp
+#define ROTATION_DELTA 0.005f
+
 #include <stdio.h>
 #include <math.h>
 #include <process.h>
@@ -11,11 +14,17 @@
 
 #include "src/include/util.h"
 #include "src/include/math_3d.h"
+#include "src/include/world_transform.h"
 
+// Global Uniforms
 GLuint VBO;
 GLuint IBO;
 GLint U_TRANSFORM;
 GLint U_LOCALPOS;
+
+// Transforms
+// TODO: Eventually move these out of the global scope.
+WorldTransform CUBE_WTRANSFORM;
 
 static void create_vertex_buffer() {
     Vertex vertices[8];
@@ -152,24 +161,12 @@ static void compile_shaders() {
 void draw() {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // -----------------------------------------
-    // Perspective Projection Testing
+    // Initialize & Setup World Transform
+    wt_set_position(&CUBE_WTRANSFORM, 0.0f, 0.0f, 2.0f);
+    wt_rotate(&CUBE_WTRANSFORM, 0.0f, ROTATION_DELTA, 0.0f);
+    Matrix4f world = wt_get_matrix(&CUBE_WTRANSFORM);
 
-    static float scale = 0.0f;
-    scale += 0.0001f;
-
-    Matrix4f rotation = new_matrix4f(cosf(scale), 0.0f, -sinf(scale), 0.0f,
-                          0.0f, 1.0f, 0.0f, 0.0f,
-                          sinf(scale), 0.0f, cosf(scale), 0.0f,
-                          0.0f, 0.0f, 0.0f, 1.0f);
-
-    Matrix4f translation = new_matrix4f(1.0f, 0.0f, 0.0f, 0.0f,
-                                     0.0f, 1.0f, 0.0f, 0.0f,
-                                     0.0f, 0.0f, 1.0f, 2.0f,
-                                     0.0f, 0.0f, 0.0f, 1.0f);
-
-    Matrix4f world = mul(&translation, &rotation);
-
+    // TODO: [Refactor] Move Camera & Frustum Calculations into their own class.
     Vector3f camera_pos = new_vec3f(0.0f, 0.0f, 0.0f);
     Vector3f U = new_vec3f(1.0f, 0.0f, 0.0f);
     Vector3f V = new_vec3f(0.0f, 1.0f, 0.0f);
@@ -179,7 +176,6 @@ void draw() {
                                    V.x, V.y, V.z, -camera_pos.y,
                                    N.x, N.y, N.z, -camera_pos.z,
                                    0.0f, 0.0f, 0.0f, 1.0f);
-
 
     float VFOV = 90.0f;
     float tanHalfFOV = tanf(radians(VFOV / 2.0f));
@@ -194,6 +190,7 @@ void draw() {
     float A = (-far_plane - near_plane) / dist;
     float B = 2.0f * far_plane * near_plane / dist;
 
+    // TODO: [Refactor] Move Projection Matrices into their own classes (Perspective & Ortho once added)
     Matrix4f projection = new_matrix4f(d / aspect_ratio, 0.0f, 0.0f, 0.0f,
                                         0.0f, d, 0.0f, 0.0f,
                                         0.0f, 0.0f, A, B,
@@ -255,6 +252,10 @@ int main(int argc, char** argv) {
     create_vertex_buffer();
     create_index_buffer();
     compile_shaders();
+
+    // Temp -> Initialize Cube Scale & Rotation before draw call
+    wt_set_rotation(&CUBE_WTRANSFORM, 0.0f, 0.0f, 0.0f);
+    wt_set_scale(&CUBE_WTRANSFORM, 1.0f);
 
     glutDisplayFunc(draw);
     glutMainLoop();
