@@ -1,6 +1,9 @@
 #ifndef VORTEXENGINE_MATH_3D_H
 #define VORTEXENGINE_MATH_3D_H
 
+#define radians(degrees) (float)(degrees * M_PI / 180.0f)
+#define degrees(radians) (float)(radians * 180.0f / M_PI)
+
 typedef struct Vector3f {
     float x;
     float y;
@@ -54,9 +57,9 @@ typedef struct Vertex {
     Vector3f color;
 } Vertex;
 
-Vertex new_vertex(float x, float y) {
+Vertex new_vertex(float x, float y, float z) {
     Vertex* vert = malloc(sizeof(Vertex));
-    vert->pos = new_vec3f(x, y, 0.0f);
+    vert->pos = new_vec3f(x, y, z);
 
     float r = (float)rand() / (float)RAND_MAX;
     float g = (float)rand() / (float)RAND_MAX;
