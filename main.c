@@ -1,4 +1,6 @@
 #define GLEW_STATIC
+#define WINDOW_WIDTH 1024
+#define WINDOW_HEIGHT 1024
 
 #include <stdio.h>
 
@@ -16,32 +18,17 @@ GLint U_TRANSFORM;
 GLint U_WORLDPOS;
 
 static void create_vertex_buffer() {
-    Vertex vertices[19];
+    Vertex vertices[8];
 
-    // Center
-    vertices[0] = new_vertex(0.0f, 0.0f);
-
-    // Top Row
-    vertices[1] = new_vertex(-1.0f, 1.0f);
-    vertices[2] = new_vertex(-0.75f, 1.0f);
-    vertices[3] = new_vertex(-0.50f, 1.0f);
-    vertices[4] = new_vertex(-0.25f, 1.0f);
-    vertices[5] = new_vertex(-0.0f, 1.0f);
-    vertices[6] = new_vertex(0.25f, 1.0f);
-    vertices[7] = new_vertex(0.50f, 1.0f);
-    vertices[8] = new_vertex(0.75f, 1.0f);
-    vertices[9] = new_vertex(1.0f, 1.0f);
-
-    // Bottom Row
-    vertices[10] = new_vertex(-1.0f, -1.0f);
-    vertices[11] = new_vertex(-0.75f, -1.0f);
-    vertices[12] = new_vertex(-0.50f, -1.0f);
-    vertices[13] = new_vertex(-0.25f, -1.0f);
-    vertices[14] = new_vertex(-0.0f, -1.0f);
-    vertices[15] = new_vertex(0.25f, -1.0f);
-    vertices[16] = new_vertex(0.50f, -1.0f);
-    vertices[17] = new_vertex(0.75f, -1.0f);
-    vertices[18] = new_vertex(1.0f, -1.0f);
+    // Cube
+    vertices[0] = new_vertex(0.5f, 0.5f, 0.5f);
+    vertices[1] = new_vertex(-0.5f, 0.5f, -0.5f);
+    vertices[2] = new_vertex(-0.5f, 0.5f, 0.5f);
+    vertices[3] = new_vertex(0.5f, -0.5f, -0.5f);
+    vertices[4] = new_vertex(-0.5f, -0.5f, -0.5f);
+    vertices[5] = new_vertex(0.5f, 0.5f, -0.5f);
+    vertices[6] = new_vertex(0.5f, -0.5f, 0.5f);
+    vertices[7] = new_vertex(-0.5f, -0.5f, 0.5f);
 
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -50,31 +37,19 @@ static void create_vertex_buffer() {
 
 static void create_index_buffer() {
     unsigned int indices[] = {
-            // Top Tris
-            0, 2, 1,
-            0, 3, 2,
-            0, 4, 3,
-            0, 5, 4,
-            0, 6, 5,
-            0, 7, 6,
-            0, 8, 7,
-            0, 9, 8,
-
-            // Bottom Tris
-            0, 10, 11,
-            0, 11, 12,
-            0, 12, 13,
-            0, 13, 14,
-            0, 14, 15,
-            0, 15, 16,
-            0, 16, 17,
-            0, 17, 18,
-
-            // Left Tri
-            0, 1, 10,
-
-            // Right Tri
-            0, 18, 9
+            // Cube
+        0, 1, 2,
+        1, 3, 4,
+        5, 6, 3,
+        7, 3, 6,
+        2, 4, 7,
+        0, 7, 6,
+        0, 5, 1,
+        1, 5, 3,
+        5, 0, 6,
+        7, 4, 3,
+        2, 1, 4,
+        0, 2, 7
     };
 
     glGenBuffers(1, &IBO);
@@ -239,16 +214,33 @@ void draw() {
     // transform_test();
 
     // -----------------------------------------
-    // Indexed Draws Testing
+    // Perspective Projection Testing
 
     static float scale = 0.0f;
-//    scale += 0.0001f;
+    scale += 0.0001f;
 
-    Matrix4f world = new_matrix4f(cosf(scale), -sinf(scale), 0.0f, 0.0f,
-                                  sinf(scale), cosf(scale), 0.0f, 0.0f,
-                                  0.0f, 0.0f, 1.0f, 0.0f,
-                                  0.0f, 0.0f, 0.0f, 1.0f);
-    glUniformMatrix4fv(U_WORLDPOS, 1, GL_TRUE, &world.mat[0][0]);
+    Matrix4f rotation = new_matrix4f(cosf(scale), 0.0f, -sinf(scale), 0.0f,
+                          0.0f, 1.0f, 0.0f, 0.0f,
+                          sinf(scale), 0.0f, cosf(scale), 0.0f,
+                          0.0f, 0.0f, 0.0f, 1.0f);
+
+    Matrix4f translation = new_matrix4f(1.0f, 0.0f, 0.0f, 0.0f,
+                                     0.0f, 1.0f, 0.0f, 0.0f,
+                                     0.0f, 0.0f, 1.0f, 2.0f,
+                                     0.0f, 0.0f, 0.0f, 1.0f);
+
+    float FOV = 90.0f;
+    float tanHalfFOV = tanf(radians(FOV / 2.0f));
+    float f = 1/tanHalfFOV;
+
+    Matrix4f projection = new_matrix4f(f, 0.0f, 0.0f, 0.0f,
+                                        0.0f, f, 0.0f, 0.0f,
+                                        0.0f, 0.0f, 1.0f, 0.0f,
+                                        0.0f, 0.0f, 1.0f, 0.0f);
+
+    Matrix4f temp = mul(&projection, &translation);
+    Matrix4f final = mul(&temp, &rotation);
+    glUniformMatrix4fv(U_WORLDPOS, 1, GL_TRUE, &final.mat[0][0]);
 
     // -----------------------------------------
 
@@ -263,7 +255,6 @@ void draw() {
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 
-
     glDrawElements(GL_TRIANGLES, 54, GL_UNSIGNED_INT, 0);
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
@@ -273,13 +264,13 @@ void draw() {
 }
 
 int main(int argc, char** argv) {
-    // Random seed based on PID
+    // Randomize seed using PID
     srand(getpid());
 
     // Create GLUT Handle & Initialize Properties
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
-    glutInitWindowSize(1024,1024);
+    glutInitWindowSize(WINDOW_WIDTH,WINDOW_HEIGHT);
     glutInitWindowPosition(100,100);
     glutCreateWindow("Vortex Engine v0.0.1");
 
@@ -293,6 +284,11 @@ int main(int argc, char** argv) {
     // Set clear color
     GLclampf r = 0.0f, g = 0.0f, b = 0.0f, a = 0.0f;
     glClearColor(r, g, b, a);
+
+    // Enable Culling
+    glEnable(GL_CULL_FACE);
+    glFrontFace(GL_CW);
+    glCullFace(GL_BACK);
 
     // Create Vertex Buffer, Index Buffer & Compile Shader Program
     create_vertex_buffer();
