@@ -7,7 +7,14 @@ find_package(GLEW REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 
-add_executable(VortexEngine main.c src/include/util.h src/common/util.c src/include/math_3d.h)
+add_executable(VortexEngine
+        main.c
+        src/include/util.h
+        src/common/util.c
+        src/include/math_3d.h
+        src/common/math_3d.c
+        src/include/world_transform.h
+        src/common/world_transform.c)
 
 # Linker Stuff
 target_link_libraries(VortexEngine ${OPENGL_LIBRARIES})
