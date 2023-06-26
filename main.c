@@ -15,7 +15,7 @@
 GLuint VBO;
 GLuint IBO;
 GLint U_TRANSFORM;
-GLint U_WORLDPOS;
+GLint U_LOCALPOS;
 
 static void create_vertex_buffer() {
     Vertex vertices[8];
@@ -37,7 +37,7 @@ static void create_vertex_buffer() {
 
 static void create_index_buffer() {
     unsigned int indices[] = {
-            // Cube
+        // Cube
         0, 1, 2,
         1, 3, 4,
         5, 6, 3,
@@ -168,8 +168,21 @@ void draw() {
                                      0.0f, 0.0f, 1.0f, 2.0f,
                                      0.0f, 0.0f, 0.0f, 1.0f);
 
-    float FOV = 90.0f;
-    float tanHalfFOV = tanf(radians(FOV / 2.0f));
+    Matrix4f world = mul(&translation, &rotation);
+
+    Vector3f camera_pos = new_vec3f(0.0f, 0.0f, 0.0f);
+    Vector3f U = new_vec3f(1.0f, 0.0f, 0.0f);
+    Vector3f V = new_vec3f(0.0f, 1.0f, 0.0f);
+    Vector3f N = new_vec3f(0.0f, 0.0f, 1.0f);
+
+    Matrix4f camera = new_matrix4f(U.x, U.y, U.z, -camera_pos.x,
+                                   V.x, V.y, V.z, -camera_pos.y,
+                                   N.x, N.y, N.z, -camera_pos.z,
+                                   0.0f, 0.0f, 0.0f, 1.0f);
+
+
+    float VFOV = 90.0f;
+    float tanHalfFOV = tanf(radians(VFOV / 2.0f));
     float d = 1/tanHalfFOV;
     float aspect_ratio = (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT;
 
@@ -186,9 +199,9 @@ void draw() {
                                         0.0f, 0.0f, A, B,
                                         0.0f, 0.0f, 1.0f, 0.0f);
 
-    Matrix4f temp = mul(&projection, &translation);
-    Matrix4f final = mul(&temp, &rotation);
-    glUniformMatrix4fv(U_WORLDPOS, 1, GL_TRUE, &final.mat[0][0]);
+    Matrix4f temp = mul(&projection, &camera);
+    Matrix4f WVP = mul(&temp, &world);
+    glUniformMatrix4fv(U_LOCALPOS, 1, GL_TRUE, &WVP.mat[0][0]);
 
     // -----------------------------------------
 
