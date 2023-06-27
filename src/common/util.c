@@ -3,7 +3,6 @@
 #include <string.h>
 
 #include "../include/util.h"
-#include "../include/camera.h"
 
 char* read_shader(const char* filename) {
     FILE* file = fopen(filename, "r");

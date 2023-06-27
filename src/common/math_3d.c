@@ -38,13 +38,6 @@ Vector3f vec3f_cross(Vector3f* vec, const Vector3f* v) {
     return new_vec3f(_x, _y, _z);
 }
 
-// Scalar x Vector multiplication
-void svmul(Vector3f* v, float scalar) {
-    v->x *= scalar;
-    v->y *= scalar;
-    v->z *= scalar;
-}
-
 // ------------------------------------------------
 
 

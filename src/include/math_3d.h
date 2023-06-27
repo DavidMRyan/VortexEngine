@@ -17,7 +17,6 @@ typedef struct Vector3f {
 Vector3f new_vec3f(float _x, float _y, float _z);
 Vector3f vec3f_normalize(Vector3f* vec);
 Vector3f vec3f_cross(Vector3f* vec, const Vector3f* v);
-void svmul(Vector3f* v, float scalar);
 
 // ------------------------------------------------
 
