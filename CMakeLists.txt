@@ -16,7 +16,9 @@ add_executable(VortexEngine
         src/include/world_transform.h
         src/common/world_transform.c
         src/include/camera.h
-        src/common/camera.c)
+        src/common/camera.c
+        src/common/projection.c
+        src/include/projection.h)
 
 # Linker Stuff
 target_link_libraries(VortexEngine ${OPENGL_LIBRARIES})
