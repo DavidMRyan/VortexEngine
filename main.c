@@ -16,20 +16,15 @@
 #include "src/include/util.h"
 #include "src/include/math_3d.h"
 #include "src/include/world_transform.h"
-#include "src/include/camera.h"
 
 // Global Uniforms
 GLuint VBO;
 GLuint IBO;
 GLint U_LOCALPOS;
 
-// Transforms & Structures
+// Transforms
 // TODO: Eventually move these out of the global scope.
 WorldTransform CUBE_WTRANSFORM;
-Camera CAMERA_MAIN;
-
-// -------------------------------------------
-// Mesh Setup
 
 static void create_vertex_buffer() {
     Vertex vertices[8];
@@ -70,13 +65,6 @@ static void create_index_buffer() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 }
-
-// -------------------------------------------
-
-
-
-// -------------------------------------------
-// Shader Setup
 
 static void add_shader(GLuint shader_program, const char* p_shader_data, GLenum shader_type) {
     GLuint shader_obj = glCreateShader(shader_type);
@@ -157,21 +145,6 @@ static void compile_shaders() {
     glUseProgram(shader_program);
 }
 
-// -------------------------------------------
-
-
-
-// -------------------------------------------
-// Callbacks
-
-static void keyboard(unsigned char key, int mouse_x, int mouse_y) {
-    cam_keyboard_input(&CAMERA_MAIN, key);
-}
-
-static void special_keyboard(int key, int mouse_x, int mouse_y) {
-    cam_keyboard_input(&CAMERA_MAIN, key);
-}
-
 void draw() {
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -180,8 +153,16 @@ void draw() {
     wt_rotate(&CUBE_WTRANSFORM, 0.0f, ROTATION_DELTA, 0.0f);
     Matrix4f world = wt_get_matrix(&CUBE_WTRANSFORM);
 
-    // Initialize Camera
-    Matrix4f view = cam_get_matrix(&CAMERA_MAIN);
+    // TODO: [Refactor] Move Camera & Frustum Calculations into their own class.
+    Vector3f camera_pos = new_vec3f(0.0f, 0.0f, 0.0f);
+    Vector3f U = new_vec3f(1.0f, 0.0f, 0.0f);
+    Vector3f V = new_vec3f(0.0f, 1.0f, 0.0f);
+    Vector3f N = new_vec3f(0.0f, 0.0f, 1.0f);
+
+    Matrix4f camera = new_matrix4f(U.x, U.y, U.z, -camera_pos.x,
+                                   V.x, V.y, V.z, -camera_pos.y,
+                                   N.x, N.y, N.z, -camera_pos.z,
+                                   0.0f, 0.0f, 0.0f, 1.0f);
 
     float VFOV = 90.0f;
     float tanHalfFOV = tanf(radians(VFOV / 2.0f));
@@ -202,9 +183,11 @@ void draw() {
                                         0.0f, 0.0f, A, B,
                                         0.0f, 0.0f, 1.0f, 0.0f);
 
-    Matrix4f temp = mul(&projection, &view);
+    Matrix4f temp = mul(&projection, &camera);
     Matrix4f WVP = mul(&temp, &world);
     glUniformMatrix4fv(U_LOCALPOS, 1, GL_TRUE, &WVP.mat[0][0]);
+
+    // -----------------------------------------
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
@@ -224,8 +207,6 @@ void draw() {
     glutPostRedisplay();
     glutSwapBuffers();
 }
-
-// -------------------------------------------
 
 int main(int argc, char** argv) {
     // Randomize seed using PID
@@ -262,16 +243,11 @@ int main(int argc, char** argv) {
     create_index_buffer();
     compile_shaders();
 
-    // Initialize Mesh Scale & Rotation
+    // Temp -> Initialize Cube Scale & Rotation before draw call
     wt_set_rotation(&CUBE_WTRANSFORM, 0.0f, 0.0f, 0.0f);
     wt_set_scale(&CUBE_WTRANSFORM, 1.0f);
 
-    // Initialize Camera
-    CAMERA_MAIN = new_camera();
-
     glutDisplayFunc(draw);
-    glutKeyboardFunc(keyboard);
-    glutSpecialFunc(special_keyboard);
     glutMainLoop();
     return 0;
 }
