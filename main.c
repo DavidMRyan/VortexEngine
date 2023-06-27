@@ -2,6 +2,9 @@
 #define VERSION "Version 0.1.3"
 #define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1080
+#define FOV 90.0f
+#define ZNEAR 1.0f
+#define ZFAR 10.0f
 
 // Temp -> Mesh Rotation Delta
 #define ROTATION_DELTA 0.005f
@@ -17,6 +20,7 @@
 #include "src/include/math_3d.h"
 #include "src/include/world_transform.h"
 #include "src/include/camera.h"
+#include "src/include/projection.h"
 
 // Global Uniforms
 GLuint VBO;
@@ -27,6 +31,7 @@ GLint U_LOCALPOS;
 // TODO: Eventually move these out of the global scope.
 WorldTransform CUBE_WTRANSFORM;
 Camera CAMERA_MAIN;
+PersProjection PERSPECTIVE;
 
 // -------------------------------------------
 // Mesh Setup
@@ -108,6 +113,7 @@ static void add_shader(GLuint shader_program, const char* p_shader_data, GLenum 
 }
 
 // Shader Files
+// TODO: Use naming convention here
 const char* pVertexShader = "./shaders/shader.vs";
 const char* pFragmentShader = "./shaders/shader.fs";
 
@@ -175,38 +181,17 @@ static void special_keyboard(int key, int mouse_x, int mouse_y) {
 void draw() {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // Initialize & Setup World Transform
-    wt_set_position(&CUBE_WTRANSFORM, 0.0f, 0.0f, 2.0f);
+    // Rotate Mesh
     wt_rotate(&CUBE_WTRANSFORM, 0.0f, ROTATION_DELTA, 0.0f);
+
+    // Initialize & Setup World-View-Perspective Matrices
     Matrix4f world = wt_get_matrix(&CUBE_WTRANSFORM);
-
-    // Initialize Camera
     Matrix4f view = cam_get_matrix(&CAMERA_MAIN);
+    Matrix4f perspective = persproj_get_matrix(&PERSPECTIVE);
 
-    float VFOV = 90.0f;
-    float tanHalfFOV = tanf(radians(VFOV / 2.0f));
-    float d = 1/tanHalfFOV;
-    float aspect_ratio = (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT;
-
-    // View Frustum Calculations
-    float near_plane = 1.0f;
-    float far_plane = 10.0f;
-    float dist = near_plane - far_plane;
-
-    float A = (-far_plane - near_plane) / dist;
-    float B = 2.0f * far_plane * near_plane / dist;
-
-    // TODO: [Refactor] Move Projection Matrices into their own classes (Perspective & Ortho once added)
-    Matrix4f projection = new_matrix4f(d / aspect_ratio, 0.0f, 0.0f, 0.0f,
-                                        0.0f, d, 0.0f, 0.0f,
-                                        0.0f, 0.0f, A, B,
-                                        0.0f, 0.0f, 1.0f, 0.0f);
-
-    Matrix4f temp = mul(&projection, &view);
+    Matrix4f temp = mul(&perspective, &view);
     Matrix4f WVP = mul(&temp, &world);
     glUniformMatrix4fv(U_LOCALPOS, 1, GL_TRUE, &WVP.mat[0][0]);
-
-    // -----------------------------------------
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
@@ -265,11 +250,13 @@ int main(int argc, char** argv) {
     compile_shaders();
 
     // Initialize Mesh Scale & Rotation
+    wt_set_position(&CUBE_WTRANSFORM, 0.0f, 0.0f, 2.0f);
     wt_set_rotation(&CUBE_WTRANSFORM, 0.0f, 0.0f, 0.0f);
     wt_set_scale(&CUBE_WTRANSFORM, 1.0f);
 
-    // Initialize Camera
+    // Initialize Camera & Projection Matrices
     CAMERA_MAIN = new_camera();
+    PERSPECTIVE = new_pers_projection(FOV, WINDOW_WIDTH, WINDOW_HEIGHT, ZNEAR, ZFAR);
 
     // Callbacks
     glutDisplayFunc(draw);

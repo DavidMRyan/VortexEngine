@@ -39,7 +39,7 @@ void cam_keyboard_input(Camera* cam, unsigned char key) {
             cam->position.x += cam->target.x;
             cam->position.y += cam->target.y;
             cam->position.z += cam->target.z;
-            printf("[Up] Position: (%f, %f, %f)\n", cam->position.x, cam->position.y, cam->position.z);
+            printf("[Up] Position: (%f, %f, [%f])\n", cam->position.x, cam->position.y, cam->position.z);
             break;
 
         case GLUT_KEY_DOWN:
@@ -47,7 +47,7 @@ void cam_keyboard_input(Camera* cam, unsigned char key) {
             cam->position.x -= cam->target.x;
             cam->position.y -= cam->target.y;
             cam->position.z -= cam->target.z;
-            printf("[Down] Position: (%f, %f, %f)\n", cam->position.x, cam->position.y, cam->position.z);
+            printf("[Down] Position: (%f, %f, [%f])\n", cam->position.x, cam->position.y, cam->position.z);
             break;
 
         case GLUT_KEY_LEFT:
@@ -57,7 +57,7 @@ void cam_keyboard_input(Camera* cam, unsigned char key) {
             cam->position.x += left.x;
             cam->position.y += left.y;
             cam->position.z += left.z;
-            printf("[Left] Position: (%f, %f, %f)\n", cam->position.x, cam->position.y, cam->position.z);
+            printf("[Left] Position: ([%f], %f, %f)\n", cam->position.x, cam->position.y, cam->position.z);
             break;
 
         case GLUT_KEY_RIGHT:
@@ -67,7 +67,7 @@ void cam_keyboard_input(Camera* cam, unsigned char key) {
             cam->position.x += right.x;
             cam->position.y += right.y;
             cam->position.z += right.z;
-            printf("[Right] Position: (%f, %f, %f)\n", cam->position.x, cam->position.y, cam->position.z);
+            printf("[Right] Position: ([%f], %f, %f)\n", cam->position.x, cam->position.y, cam->position.z);
             break;
 
         case GLUT_KEY_PAGE_UP:
