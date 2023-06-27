@@ -5,6 +5,7 @@
 #include <assert.h>
 
 #include "../include/math_3d.h"
+#include "../include/camera.h"
 
 // ------------------------------------------------
 // Vector Definitions & Related
@@ -152,22 +153,4 @@ void init_rotation_z(Matrix4f* _mat, float z) {
     _mat->mat[1][0] = -sinf(z); _mat->mat[1][1] = cosf(z); _mat->mat[1][2] = 0.0f; _mat->mat[1][3] = 0.0f;
     _mat->mat[2][0] = 0.0f;        _mat->mat[2][1] = 0.0f;       _mat->mat[2][2] = 1.0f; _mat->mat[2][3] = 0.0f;
     _mat->mat[3][0] = 0.0f;        _mat->mat[3][1] = 0.0f;       _mat->mat[3][2] = 0.0f; _mat->mat[3][3] = 1.0f;
-}
-
-void init_camera_transform(Matrix4f* _mat, const Vector3f* target, const Vector3f* up) {
-    Vector3f N = *target;
-    vec3f_normalize(&N);
-
-    Vector3f n_up = *up;
-    vec3f_normalize(&n_up);
-
-    Vector3f U = vec3f_cross(&n_up, &N);
-    vec3f_normalize(&U);
-
-    Vector3f V = vec3f_cross(&N, &U);
-
-    _mat->mat[0][0] = U.x;   _mat->mat[0][1] = U.y;   _mat->mat[0][2] = U.z;   _mat->mat[0][3] = 0.0f;
-    _mat->mat[1][0] = V.x;   _mat->mat[1][1] = V.y;   _mat->mat[1][2] = V.z;   _mat->mat[1][3] = 0.0f;
-    _mat->mat[2][0] = N.x;   _mat->mat[2][1] = N.y;   _mat->mat[2][2] = N.z;   _mat->mat[2][3] = 0.0f;
-    _mat->mat[3][0] = 0.0f;  _mat->mat[3][1] = 0.0f;  _mat->mat[3][2] = 0.0f;  _mat->mat[3][3] = 1.0f;
 }

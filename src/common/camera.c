@@ -19,8 +19,26 @@ Camera new_camera() {
 // Accessors
 Matrix4f cam_get_matrix(Camera* cam) {
     Matrix4f cam_transform;
-    init_camera_transform(&cam_transform, &cam->target, &cam->up);
+    init_camera_transform(cam, &cam_transform, &cam->target, &cam->up);
     return cam_transform;
+}
+
+void init_camera_transform(Camera* cam, Matrix4f* _mat, const Vector3f* target, const Vector3f* up) {
+    Vector3f N = *target;
+    vec3f_normalize(&N);
+
+    Vector3f n_up = *up;
+    vec3f_normalize(&n_up);
+
+    Vector3f U = vec3f_cross(&n_up, &N);
+    vec3f_normalize(&U);
+
+    Vector3f V = vec3f_cross(&N, &U);
+
+    _mat->mat[0][0] = U.x;   _mat->mat[0][1] = U.y;   _mat->mat[0][2] = U.z;   _mat->mat[0][3] = -cam->position.x;
+    _mat->mat[1][0] = V.x;   _mat->mat[1][1] = V.y;   _mat->mat[1][2] = V.z;   _mat->mat[1][3] = -cam->position.y;
+    _mat->mat[2][0] = N.x;   _mat->mat[2][1] = N.y;   _mat->mat[2][2] = N.z;   _mat->mat[2][3] = -cam->position.z;
+    _mat->mat[3][0] = 0.0f;  _mat->mat[3][1] = 0.0f;  _mat->mat[3][2] = 0.0f;  _mat->mat[3][3] = 1.0f;
 }
 
 // Mutators

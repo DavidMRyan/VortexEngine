@@ -10,7 +10,6 @@
 #define ROTATION_DELTA 0.005f
 
 #include <stdio.h>
-#include <math.h>
 #include <process.h>
 
 #include <GL/glew.h>
@@ -249,11 +248,12 @@ int main(int argc, char** argv) {
     create_index_buffer();
     compile_shaders();
 
-    // Initialize Mesh Scale & Rotation
+    // Set Mesh Position, Rotation & Scale
     wt_set_position(&CUBE_WTRANSFORM, 0.0f, 0.0f, 2.0f);
     wt_set_rotation(&CUBE_WTRANSFORM, 0.0f, 0.0f, 0.0f);
     wt_set_scale(&CUBE_WTRANSFORM, 1.0f);
 
+    // TODO: Fix camera movement, modifying camera->position doesn't seem to do anything.
     // Initialize Camera & Projection Matrices
     CAMERA_MAIN = new_camera();
     PERSPECTIVE = new_pers_projection(FOV, WINDOW_WIDTH, WINDOW_HEIGHT, ZNEAR, ZFAR);
